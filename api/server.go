@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -74,17 +73,19 @@ func (a *App) initializeRoutes() {
 }
 
 func (a *App) homeHandler(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, 200, "hello, world!")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("hello, world!"))
 }
 
 func (a *App) aliveHandler(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, 200, "It's...ALIVE!!!")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("It's...ALIVE!!!"))
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
+// func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+// 	response, _ := json.Marshal(payload)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(code)
+// 	w.Write(response)
+// }
