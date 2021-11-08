@@ -9,18 +9,23 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 
 	"github.com/mjevans93308/avoxi-demo-app/config"
+	"github.com/mjevans93308/avoxi-demo-app/utils"
 )
+
+var logger = utils.InitLogger()
 
 // App structured as standalone object to better facilitate testing
 type App struct {
-	Router *mux.Router
+	Router *gin.Engine
 }
 
 func (a *App) Initialize() {
-	a.Router = mux.NewRouter()
+	logger.Info("App initialized")
+	a.Router = gin.Default()
 	a.initializeRoutes()
 }
 
@@ -43,7 +48,7 @@ func (a *App) Run(address string) {
 	// not strictly necessary for a demo, but safer for err detection and more realistic for real world app
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Error running server: %s\n", err.Error())
+			logger.Errorf("Error running server: %s\n", err.Error())
 		}
 	}()
 
@@ -58,34 +63,21 @@ func (a *App) Run(address string) {
 	}()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server Shutdown Failed:%+v", err)
+		logger.Errorf("Server Shutdown Failed:%+v", err)
 	}
 	log.Print("Server Exited Properly")
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc(config.HOME, a.homeHandler).Methods("GET")
 
-	s := a.Router.PathPrefix(config.API_GROUP + config.V1_GROUP).Subrouter()
-	s.HandleFunc(config.ALIVE, a.aliveHandler)
+	// create router with Alive endpoint for uptime checking
+	a.Router.GET(config.Alive, a.aliveHandler)
 
-	// register additional routes here
+	// created basic auth secured subrouter for business logic endpoints
+	// gin supports basic auth cred pairs, that if not matched will fail the request with a 401
+	authenticated := a.Router.Group(config.Api_Group+config.V1_Group, gin.BasicAuth(gin.Accounts{
+		viper.GetString(config.Basic_Auth_Username): viper.GetString(config.Basic_Auth_Password),
+	}))
+
+	authenticated.POST(config.CheckIPLocation, a.CheckGeoLocation)
 }
-
-func (a *App) homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("hello, world!"))
-}
-
-func (a *App) aliveHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("It's...ALIVE!!!"))
-}
-
-// func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-// 	response, _ := json.Marshal(payload)
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(code)
-// 	w.Write(response)
-// }

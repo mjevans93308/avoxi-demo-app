@@ -1,11 +1,28 @@
 package config
 
 const (
-	ADDRESS   = ":8080"
-	API_GROUP = "/api"
-	V1_GROUP  = "/v1"
+	// basic auth creds
+	Basic_Auth_Username = "BASIC_AUTH_USERNAME"
+	Basic_Auth_Password = "BASIC_AUTH_PASSWORD"
+
+	// external geoIP lookup api creds
+	Maxmind_User_Id    = "MAXMIND_USER_ID"
+	Maxind_License_Key = "MAXIND_LICENSE_KEY"
+
+	Address = ":8080"
 
 	// routes
-	HOME  = "/"
-	ALIVE = "/alive"
+	Api_Group = "/api"
+	V1_Group  = "/v1"
+
+	Home            = "/"
+	Alive           = "/alive"
+	CheckIPLocation = "/checkiplocation"
+
+	English       = "en"
+	Serve_Command = "serve"
+
+	ConfigFileType     = "env"
+	ConfigFileLocation = "."
+	CobraCommandName   = "avoxi-demo-app"
 )

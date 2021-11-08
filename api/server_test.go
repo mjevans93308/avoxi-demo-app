@@ -11,28 +11,9 @@ import (
 
 var a App
 
-func TestHomeHandler(t *testing.T) {
-	a.Initialize()
-	req, _ := http.NewRequest(http.MethodGet, config.HOME, nil)
-
-	rr := httptest.NewRecorder()
-	a.Router.ServeHTTP(rr, req)
-
-	if http.StatusOK != rr.Code {
-		t.Errorf("Expected response code %d. Got %d\n", http.StatusOK, rr.Code)
-	}
-
-	log.Print(rr.Body.String())
-	expected := "hello, world!"
-
-	if body := rr.Body.String(); body != expected {
-		t.Errorf("Expected %s. Got %s", expected, body)
-	}
-}
-
 func TestAliveHandler(t *testing.T) {
 	a.Initialize()
-	req, _ := http.NewRequest(http.MethodGet, config.API_GROUP+config.V1_GROUP+config.ALIVE, nil)
+	req, _ := http.NewRequest(http.MethodGet, config.Alive, nil)
 
 	rr := httptest.NewRecorder()
 	a.Router.ServeHTTP(rr, req)

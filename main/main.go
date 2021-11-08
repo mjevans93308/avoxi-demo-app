@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/mjevans93308/avoxi-demo-app/api"
 	"github.com/mjevans93308/avoxi-demo-app/config"
@@ -12,24 +13,37 @@ import (
 
 func serverCmd() *cobra.Command {
 	return &cobra.Command{
-		Use: "server",
+		Use: config.Serve_Command,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			loadConfig()
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			a := api.App{}
 			a.Initialize()
-			a.Run(config.ADDRESS)
+			a.Run(config.Address)
 
 			return nil
-
 		},
 	}
 }
 
+func loadConfig() {
+	viper.SetConfigType(config.ConfigFileType)
+	viper.AddConfigPath(config.ConfigFileLocation)
+	viper.SetConfigName(config.CobraCommandName)
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+	viper.GetString(config.Basic_Auth_Password)
+}
+
 func main() {
 	cmd := &cobra.Command{
-		Use:     "avoxi-demo-app",
+		Use:     config.CobraCommandName,
 		Short:   "Avoxi Demo App",
-		Version: "0.1",
+		Version: "0.0.1",
 	}
 
 	cmd.AddCommand(serverCmd())
