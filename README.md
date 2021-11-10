@@ -33,8 +33,8 @@ curl --location --request POST 'localhost:8080/api/v1/checkiplocation' \
 }'
 ```
 ## Possible Return Codes
-| HTTP Status Code  | Reason | Notes |
-| ------------- | ------------- | ------------- |
+| HTTP Status Code  | Reason |
+| ------------- | ------------- |
 | `302` | Country lookup via geoIP lookup succeeded, and it matched a country in the whitelist  |
 | `404`  | Country lookup via geoIP lookup succeeded, but it did not match a country in the whitelist  |
 | `400`  | Request body was malformed or not all values provided in the payload were valid  |
@@ -42,12 +42,12 @@ curl --location --request POST 'localhost:8080/api/v1/checkiplocation' \
 This service is secured via Basic Authentication. The basic auth creds in the above example are `admin:password`, but can and should be changed in the .env file provided in the top-level project directory.
 We assume that the IP address provided in the JSON payload will adhere to IPv4 structure, but the system can already handle IPv6 addresses as well, if the need ever arises.
 
-We assume that the `country_names` field provided will be a list of strings. We could have asked for a comma-separated list like "Mexico,Canada,...etc" but thought that a list would be easier to parse given the existence of companies with spaces in their name, like the United States or Republic of Korea. Escaping spaces in a single string could be done, but it adds complexity when it isn't necessary.
+We assume that the `country_names` field provided will be a list of strings. We could have asked for a comma-separated list like `"Mexico,Canada,...etc"` but thought that a list would be easier to parse given the existence of companies with spaces in their name, like the `United States` or `Republic of Korea`. Escaping spaces in a single string could be done, but it adds complexity when it can probably be avoided.
 
-The same consideration to spaces in a countries' name applies in our conscious decision to provide our endpoint as a `POST` request, so that we can ask for and expect a JSON object rather than building it as a `GET` request, and leaving the values in the URL itself as query parameters like `http://localhost:8080/api/v1/checkiplocation?ip=x.x.x.x&country_names=Canada,Mexico,Ireland`.
+The same consideration to spaces in a countries' name applies in our decision to provide our endpoint as a `POST` request, so that we can ask for and expect a JSON object rather than building it as a `GET` request, and leaving the values in the URL itself as query parameters like `http://localhost:8080/api/v1/checkiplocation?ip=x.x.x.x&country_names=Canada,Mexico,Ireland`.
 
 # Setup
-This service will need to provide geoip credentials of the form User_ID / License_Key for us to utilize their 3rd party web service. Instructions for generating those credentials can be found at https://dev.maxmind.com/geoip/geolite2-free-geolocation-data#Access. Once generated, those credentials should be placed in the .env file with the Basic Authentication credentials. The .env file will resemble this:
+This service will need to provide geoip credentials of the form `User_ID` / `License_Key` for us to utilize their 3rd party web service. Instructions for generating those credentials can be found at https://dev.maxmind.com/geoip/geolite2-free-geolocation-data#Access. Once generated, those credentials should be placed in the .env file with the Basic Authentication credentials. The `.env` file will resemble this:
 ```# basic auth creds
 BASIC_AUTH_USERNAME=foo
 BASIC_AUTH_PASSWORD=bar
@@ -59,8 +59,9 @@ MAXIND_LICENSE_KEY=world
 # environment
 ENVIRONMENT=test
 ```
-Additional environment variables that handle sensitive information should also be placed here. Check how we're using the credentials already in the env file for examples of how to use an env var once it is loaded in the workspace.
-Before release of this service, make sure the `ENVIRONMENT` var is set to `prod`. Setting it to `test` at the moment logs the IP address along with whether the requests succeeded or failed.
+Additional environment variables that handle sensitive information should also be placed here. Check how we're using the credentials already in the `.env` file for examples of how to use an environment variable once it is loaded in the workspace.
+
+Before release of this service, make sure the `ENVIRONMENT` var is set to `prod`. Setting it to `test` at the moment logs the IP address along with whether the request succeeded or failed.
 
 # Running
 ## Local Development
@@ -104,4 +105,4 @@ In order to avoid issues keeping the mapping data up to date we are directly uti
 - github.com/spf13/viper for environment config support
 - github.com/spf13/cobra for standalone CLI support
 - inet.af/netaddr for IP validation/parsing support
-- github.com/gin-gonic/gin for HTTP router and basic web server needs.
+- github.com/gin-gonic/gin for HTTP router and basic web service needs.
