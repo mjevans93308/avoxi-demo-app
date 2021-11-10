@@ -97,8 +97,5 @@ func buildName(geoIpResp *types.GeoIpResponse) (string, error) {
 		return "", err
 	}
 
-	logger.Info("contents of geoip response struct:")
-	logger.Info(geoIpResp)
-
 	return name, nil
 }
