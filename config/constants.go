@@ -9,6 +9,9 @@ const (
 	Maxmind_User_Id    = "MAXMIND_USER_ID"
 	Maxind_License_Key = "MAXIND_LICENSE_KEY"
 
+	Environment = "ENVIRONMENT"
+	TestEnv     = "test"
+
 	Address = ":8080"
 
 	// routes
@@ -17,6 +20,8 @@ const (
 
 	Home            = "/"
 	Alive           = "/alive"
+	Inform          = "/inform"
+	Teapot          = "/teapot"
 	CheckIPLocation = "/checkiplocation"
 
 	English       = "en"
@@ -25,4 +30,6 @@ const (
 	ConfigFileType     = "env"
 	ConfigFileLocation = "."
 	CobraCommandName   = "avoxi-demo-app"
+
+	GeoliteUrl = "https://geolite.info/geoip/v2.1/country/%s?pretty"
 )

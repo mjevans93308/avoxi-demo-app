@@ -20,7 +20,7 @@ func serverCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			a := api.App{}
-			a.Initialize()
+			a.Initialize(false)
 			a.Run(config.Address)
 
 			return nil

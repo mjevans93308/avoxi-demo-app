@@ -3,81 +3,105 @@ package api
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mjevans93308/avoxi-demo-app/config"
 	"github.com/spf13/viper"
 	"inet.af/netaddr"
-
-	"github.com/mjevans93308/avoxi-demo-app/config"
-	"github.com/mjevans93308/avoxi-demo-app/models"
 )
 
+// aliveHandler serves as healthcheck endpoint
 func (a *App) aliveHandler(c *gin.Context) {
-	logger.Info("It's...ALIVE!!!")
-	logger.Info(viper.GetString(config.Basic_Auth_Username))
+	logger.Info("Received call to IsAliveHandler")
 	c.String(http.StatusOK, "It's...ALIVE!!!")
 }
 
+// informHandler is gin's polling for aliveness
+func (a *App) informHandler(c *gin.Context) {
+	logger.Info("Received call to inform")
+	c.Status(http.StatusOK)
+}
+
+// informHandler is gin's polling for aliveness
+func (a *App) teapotHandler(c *gin.Context) {
+	logger.Info("Am I a teapot?")
+	c.Status(http.StatusTeapot)
+}
+
 type payload struct {
-	Ip_address    string `json:"ip_address"`
-	Country_names string `json:"country_names"`
+	Ip_address    string   `json:"ip_address"`
+	Country_names []string `json:"country_names"`
 }
 
-type response struct {
-	Location_check_pass bool   `json:"location_check_pass"`
-	Country_name        string `json:"country_name"`
-}
-
+// CheckGeoLocation is our main endpoint
+// We expect a POST from an outside endpoint with basic auth header and a json payload
+// format:
+// {
+//     "ip_address": "X.X.X.X",
+//     "country_names": [
+// 	"Mexico",
+// 	"Canada",
+// ]
+// }
+// This endpoint will return a 302 if the IP was mapped to a country in the country_names list
+// or a 404 if the IP lookup fails
+// Other error codes are 400 if the json payload is malformed or the IP does not conform to IPv4 or IPv6 standards
 func (a *App) CheckGeoLocation(c *gin.Context) {
 	logger.Info("Received call to check geolocation")
+
+	if c.Request.Header.Get("Content-Type") != "application/json" {
+		logger.Warn("Received request without Content-Type=application/json header. Will attempt to parse anyways.")
+	}
+
 	var payload payload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		logger.Error("Could not bind json")
+		logger.Error(err)
 		c.AbortWithError(http.StatusBadRequest, err)
 	}
 
-	if payload.Ip_address == "" || payload.Country_names == "" {
+	if payload.Ip_address == "" || payload.Country_names == nil {
 		logger.Error("Could not complete request due to missing parameters")
-		c.AbortWithError(http.StatusInternalServerError, errors.New("could not complete request due to missing parameters"))
+		c.AbortWithError(http.StatusBadRequest, errors.New("could not complete request due to missing parameters"))
 	}
 
-	// unpack payload
 	// netaddr.ParseIP() handles both IPv4 and IPv6 addr schemas
+	// https://pkg.go.dev/inet.af/netaddr#ParseIP
 	ip_address, err := netaddr.ParseIP(payload.Ip_address)
 	if err != nil {
 		logger.Error("Could not parse IP from payload to native IP object")
-		c.AbortWithError(http.StatusInternalServerError, errors.New("could not complete request due to missing parameters"))
+		c.AbortWithError(http.StatusBadRequest, errors.New("could not complete request due to malformed IP address"))
 	}
 
-	geolocation := models.GeolocationPackage{
-		Ip_address:    ip_address,
-		Country_Names: strings.Split(payload.Country_names, ","),
-	}
-
-	country_name, err := SendOutboundRequest(&geolocation.Ip_address)
+	country_name, err := a.Outbound.sendOutboundRequest(&ip_address)
 	if err != nil {
 		logger.Error("Unable to complete lookup request")
 		c.AbortWithStatusJSON(http.StatusNotFound, err)
 	}
 
 	// check if country_name resides in list of supplied countries
-	resp := response{
-		Location_check_pass: false,
-		Country_name:        "",
-	}
-	for _, c_name := range geolocation.Country_Names {
+	found := false
+	for _, c_name := range payload.Country_names {
 		if c_name == country_name {
-			resp.Location_check_pass = true
-			resp.Country_name = c_name
+			found = true
 			break
 		}
 	}
 
-	// respond with either a 302 or 404 and a json body
-	if resp.Location_check_pass {
-		c.JSON(http.StatusFound, resp)
+	// respond with either a 302 or 404
+	// log the IP with the request success/fail if we are in test mode
+	if found {
+		if viper.GetString(config.Environment) == config.TestEnv {
+			logger.Infof("Found country match for ip: %s", ip_address)
+		} else {
+			logger.Info("Found country match")
+		}
+		c.Status(http.StatusFound)
 	} else {
-		c.JSON(http.StatusNotFound, resp)
+		if viper.GetString(config.Environment) == config.TestEnv {
+			logger.Infof("Found no country match for ip: %s", ip_address)
+		} else {
+			logger.Info("No match found")
+		}
+		c.Status(http.StatusNotFound)
 	}
 }

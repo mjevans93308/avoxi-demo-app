@@ -6,7 +6,7 @@
 # docker ps (to grab container id)
 # docker exec -it <container_id> /bin/sh
 
-# multistage dockerfile to minimise our image's size
+# multistage dockerfile to minimise our final image size
 FROM golang:alpine AS builder
 
 ENV GO111MODULE=on

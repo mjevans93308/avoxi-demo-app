@@ -20,13 +20,20 @@ var logger = utils.InitLogger()
 
 // App structured as standalone object to better facilitate testing
 type App struct {
-	Router *gin.Engine
+	Router   *gin.Engine
+	Outbound *Outbound
 }
 
-func (a *App) Initialize() {
-	logger.Info("App initialized")
+func (a *App) Initialize(testing bool) {
 	a.Router = gin.Default()
-	a.initializeRoutes()
+	if viper.GetString(config.Environment) == config.TestEnv {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	a.initializeRoutes(testing)
+	a.Outbound = initOutboundApi()
+	logger.Info("App initialized")
 }
 
 func (a *App) Run(address string) {
@@ -68,16 +75,26 @@ func (a *App) Run(address string) {
 	log.Print("Server Exited Properly")
 }
 
-func (a *App) initializeRoutes() {
+// initializeRoutes attaches all routes and subrouters to our App instance
+func (a *App) initializeRoutes(testing bool) {
 
 	// create router with Alive endpoint for uptime checking
 	a.Router.GET(config.Alive, a.aliveHandler)
+	a.Router.POST(config.Inform, a.informHandler)
+	a.Router.GET(config.Teapot, a.teapotHandler)
 
 	// created basic auth secured subrouter for business logic endpoints
-	// gin supports basic auth cred pairs, that if not matched will fail the request with a 401
-	authenticated := a.Router.Group(config.Api_Group+config.V1_Group, gin.BasicAuth(gin.Accounts{
-		viper.GetString(config.Basic_Auth_Username): viper.GetString(config.Basic_Auth_Password),
-	}))
+	// gin supports basic auth cred pairs that if not matched will fail the request with a 401
 
-	authenticated.POST(config.CheckIPLocation, a.CheckGeoLocation)
+	if testing {
+		noauth := a.Router.Group(config.Api_Group + config.V1_Group)
+		noauth.POST(config.CheckIPLocation, a.CheckGeoLocation)
+	} else {
+		authenticated := a.Router.Group(config.Api_Group+config.V1_Group, gin.BasicAuth(gin.Accounts{
+			viper.GetString(config.Basic_Auth_Username): viper.GetString(config.Basic_Auth_Password),
+		}))
+
+		authenticated.POST(config.CheckIPLocation, a.CheckGeoLocation)
+	}
+
 }
