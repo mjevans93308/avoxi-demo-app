@@ -10,6 +10,8 @@ import (
 	"inet.af/netaddr"
 )
 
+var Ip_Country_Mapping = make(map[netaddr.IP]string)
+
 // aliveHandler serves as healthcheck endpoint
 func (a *App) aliveHandler(c *gin.Context) {
 	logger.Info("Received call to IsAliveHandler")
@@ -72,16 +74,24 @@ func (a *App) CheckGeoLocation(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, errors.New("could not complete request due to malformed IP address"))
 	}
 
-	country_name, err := a.Outbound.sendOutboundRequest(&ip_address)
-	if err != nil {
-		logger.Error("Unable to complete lookup request")
-		c.AbortWithStatusJSON(http.StatusNotFound, err)
+	var mapped_country_name string
+	// Check internal mapping table to see if we've received a request for this
+	if Ip_Country_Mapping[ip_address] != "" {
+		mapped_country_name = Ip_Country_Mapping[ip_address]
+	} else {
+		country_name, err := a.Outbound.sendOutboundRequest(&ip_address)
+		if err != nil {
+			logger.Error("Unable to complete lookup request")
+			c.AbortWithStatusJSON(http.StatusNotFound, err)
+		}
+		mapped_country_name = country_name
+		Ip_Country_Mapping[ip_address] = country_name
 	}
 
 	// check if country_name resides in list of supplied countries
 	found := false
 	for _, c_name := range payload.Country_names {
-		if c_name == country_name {
+		if c_name == mapped_country_name {
 			found = true
 			break
 		}
