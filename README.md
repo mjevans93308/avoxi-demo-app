@@ -84,11 +84,12 @@ This allows us to not expose any sensitive information to console logging during
 
 # Considerations and Assumptions
 In order to avoid issues keeping the mapping data up to date we are directly utilizing the geolite2 web service (documented at https://dev.maxmind.com/geoip/docs/web-services?lang=en) rather than downloading a local copy of their database. This allows us to always be on the latest data they have.
-- Some pros/cons to this decision:
-    - This workflow is simpler due to abstracting our data upkeep and validation needs to a 3rd party, in this case geoip.
-    - Need to take into consideration changes to the 3rd party API, although they state that any future api development will be versioned according.
-    - Need to be mindful of how many geoip API calls we are making from our service due to the possibility of web service throttling on their end. Currently we cache each unique ip -> country mapping in a static map in Go, but obviously we would want to be mindful of the memory footprint of this map as we process calls. Using as standalone storage solution specifically for Key-Value schema lookup and fast reads like Redis would be a good long term solution, especially since we could config the Redis table with an entry lifetime limit to manage the size of the table.
-    - If their service still isn't up to handling the breadth of calls we encounter then we might need to explore a different service architecture. We're currently utilizing the free service, but paying for a more robust and/or accurate version could be considered.
+
+Some pros/cons to this decision:
+- Allows us to abstract away our data upkeep and validation needs to a 3rd party. This can be seen as either a pro or a con depending on how much we trust the 3rd party.
+- Need to take into consideration changes to the 3rd party API, although they state that any future api development will be versioned according.
+- Need to be mindful of how many geoip API calls we are making from our service due to the possibility of web service throttling on their end. Currently we cache each unique ip -> country mapping in a static map in Go, but obviously we would want to be mindful of the memory footprint of this map as we process calls. Using a standalone storage solution specifically tailored to our need (Key-Value schema and fast reads) like Redis would be a good long term solution, especially since we could configure the Redis table with an entry lifetime limit to manage the size of the table.
+- If their service still isn't up to handling the breadth of calls we encounter then we might need to explore a different service architecture. We're currently utilizing the free service, but paying for a more robust and/or accurate version could be considered.
 - If there comes a time when using the geoip web service isn't possible, we could explore automating the process of downloading their entire ip -> country mapping database and storing it in our environment for our use. This approach would be more complicated and involve the use of our own storage solution like DynamoDB or Redis. This would solve the throttling issue but we would still be dependent on a 3rd party.
 
 # Future Ideas
@@ -96,7 +97,7 @@ In order to avoid issues keeping the mapping data up to date we are directly uti
 - Implement RPC support using gRPC or Twirp
 - Examine whether a more robust security device besides Basic Authentication should be explored. JWTs might be an option, but could also just be too much hassle for what they would provide.
 - Better testing coverage, specifically around the api package
-- Work with team where requests will originate to start sending `X-Request-ID` header so that we can log specific request details. Currently the only useful identifying data being sent with each request is the IP address, which is probably too sensitive for logging in production code.
+- Work with team where requests will originate to start sending `X-Request-ID` header so that we can log specific request details. Currently the only useful identifying data being sent with each request is the IP address, which is too sensitive for logging in production code.
 - Add makefile support.
 - Replace static Go map with standalone storage solution whose memory footprint can be more easily monitored and managed.
 
