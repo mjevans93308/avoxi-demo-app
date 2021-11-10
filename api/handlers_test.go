@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,7 +23,7 @@ func TestAliveHandler(t *testing.T) {
 		t.Errorf("Expected response code %d. Got %d\n", http.StatusOK, rr.Code)
 	}
 
-	log.Print(rr.Body.String())
+	logger.Info(rr.Body.String())
 	expected := "It's...ALIVE!!!"
 
 	if body := rr.Body.String(); body != expected {

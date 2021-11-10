@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -61,7 +60,7 @@ func (a *App) Run(address string) {
 
 	// check channel for if we've stopped server
 	<-done
-	log.Print("Server stopped")
+	logger.Info("Server stopped")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
@@ -72,7 +71,7 @@ func (a *App) Run(address string) {
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Errorf("Server Shutdown Failed:%+v", err)
 	}
-	log.Print("Server Exited Properly")
+	logger.Info("Server Exited Properly")
 }
 
 // initializeRoutes attaches all routes and subrouters to our App instance

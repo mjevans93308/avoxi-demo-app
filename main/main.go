@@ -36,7 +36,6 @@ func loadConfig() {
 		fmt.Println(err)
 		os.Exit(0)
 	}
-	viper.GetString(config.Basic_Auth_Password)
 }
 
 func main() {

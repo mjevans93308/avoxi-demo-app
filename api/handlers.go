@@ -51,20 +51,7 @@ type payload struct {
 func (a *App) CheckGeoLocation(c *gin.Context) {
 	logger.Info("Received call to check geolocation")
 
-	if c.Request.Header.Get("Content-Type") != "application/json" {
-		logger.Warn("Received request without Content-Type=application/json header. Will attempt to parse anyways.")
-	}
-
-	var payload payload
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		logger.Error(err)
-		c.AbortWithError(http.StatusBadRequest, err)
-	}
-
-	if payload.Ip_address == "" || payload.Country_names == nil {
-		logger.Error("Could not complete request due to missing parameters")
-		c.AbortWithError(http.StatusBadRequest, errors.New("could not complete request due to missing parameters"))
-	}
+	payload := validatePayload(c)
 
 	// netaddr.ParseIP() handles both IPv4 and IPv6 addr schemas
 	// https://pkg.go.dev/inet.af/netaddr#ParseIP
@@ -114,4 +101,29 @@ func (a *App) CheckGeoLocation(c *gin.Context) {
 		}
 		c.Status(http.StatusNotFound)
 	}
+}
+
+// validatePayload is a helper function to check that the JSON payload sent in the request was not malformed
+// and all the fieds necessary are present and have values
+// if any validation fails, we produce a 400 Bad Request response and abort the handler chain
+// otherwise return a payload struct
+func validatePayload(c *gin.Context) *payload {
+	logger.Info("Received call to check geolocation")
+
+	if c.Request.Header.Get("Content-Type") != "application/json" {
+		logger.Warn("Received request without Content-Type=application/json header. Will attempt to parse anyways.")
+	}
+
+	var payload payload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		logger.Error(err)
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
+
+	if payload.Ip_address == "" || payload.Country_names == nil {
+		logger.Error("Could not complete request due to missing parameters")
+		c.AbortWithError(http.StatusBadRequest, errors.New("could not complete request due to missing parameters"))
+	}
+
+	return &payload
 }

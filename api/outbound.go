@@ -33,6 +33,11 @@ func initOutboundApi() *Outbound {
 	}
 }
 
+// sendOutboundRequest sends an http request to geolite's web service to lookup the geographic location
+// for a given IP address
+// full documentation for the endpoint: https://dev.maxmind.com/geoip/geolocate-an-ip/web-services
+// We validate the response and parse it for the country name where the IP resides
+// We return the string representation of that country's name in English
 func (o *Outbound) sendOutboundRequest(ip_address *netaddr.IP) (string, error) {
 
 	if o == nil {
