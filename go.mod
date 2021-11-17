@@ -1,4 +1,4 @@
-module github.com/mjevans93308/avoxi-demo-app
+module github.com/mjevans93308/geolocate-ip-demo-app
 
 go 1.17
 

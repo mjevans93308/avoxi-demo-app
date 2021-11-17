@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 
-	"github.com/mjevans93308/avoxi-demo-app/config"
-	"github.com/mjevans93308/avoxi-demo-app/utils"
+	"github.com/mjevans93308/geolocate-ip-demo-app/config"
+	"github.com/mjevans93308/geolocate-ip-demo-app/utils"
 )
 
 var logger = utils.InitLogger()

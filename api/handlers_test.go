@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mjevans93308/avoxi-demo-app/config"
+	"github.com/mjevans93308/geolocate-ip-demo-app/config"
 )
 
 var a App

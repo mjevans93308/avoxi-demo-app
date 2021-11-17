@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/viper"
 	"inet.af/netaddr"
 
-	"github.com/mjevans93308/avoxi-demo-app/config"
-	"github.com/mjevans93308/avoxi-demo-app/types"
+	"github.com/mjevans93308/geolocate-ip-demo-app/config"
+	"github.com/mjevans93308/geolocate-ip-demo-app/types"
 )
 
 type Outbound struct {

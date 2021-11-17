@@ -29,7 +29,7 @@ const (
 
 	ConfigFileType     = "env"
 	ConfigFileLocation = "."
-	CobraCommandName   = "avoxi-demo-app"
+	CobraCommandName   = "geolocate-ip-demo-app"
 
 	GeoliteUrl = "https://geolite.info/geoip/v2.1/country/%s?pretty"
 )

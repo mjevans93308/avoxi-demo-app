@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/mjevans93308/avoxi-demo-app/api"
-	"github.com/mjevans93308/avoxi-demo-app/config"
+	"github.com/mjevans93308/geolocate-ip-demo-app/api"
+	"github.com/mjevans93308/geolocate-ip-demo-app/config"
 )
 
 func serverCmd() *cobra.Command {
@@ -41,7 +41,7 @@ func loadConfig() {
 func main() {
 	cmd := &cobra.Command{
 		Use:     config.CobraCommandName,
-		Short:   "Avoxi Demo App",
+		Short:   "geolocate-ip Demo App",
 		Version: "0.0.1",
 	}
 

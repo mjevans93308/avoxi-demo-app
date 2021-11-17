@@ -1,4 +1,4 @@
-# AVOXI DEMO APP PROMPT
+# geolocate-ip DEMO APP PROMPT
 
 Scenario (note, this is fictional, but gives a sense of the types of requests we might encounter):
 Our product team has heard from several customers that we restrict users to logging in to their UI accounts from selected countries to prevent them from outsourcing their work to others.  For an initial phase one we're not going to worry about VPN connectivity, only the presented IP address.
@@ -73,12 +73,12 @@ go build -o out/app main/main.go && ./out/app serve
 ## Docker
 The assumption is this service will be run via Docker, and a Dockerfile is provided in the top-level project directory. Commands for building the Docker image and running that image are as follows:
 ```
-docker build -f Dockerfile -t avoxi-demo-app:0.0.1 .
-docker run --env-file ./avoxi-demo-app.env --publish 8080:8080 avoxi-demo-app:0.0.1
+docker build -f Dockerfile -t geolocate-ip-demo-app:0.0.1 .
+docker run --env-file ./geolocate-ip-demo-app.env --publish 8080:8080 geolocate-ip-demo-app:0.0.1
 ```
 To get the .env file into the docker workspace we provide the .env file as a arg in the `docker run` command, and then inside the Dockerfile we copy it into our final image via 
 ```
-COPY --from=builder /build/avoxi-demo-app.env .
+COPY --from=builder /build/geolocate-ip-demo-app.env .
 ```
 This allows us to not expose any sensitive information to console logging during build and release. The .env file cannot be committed to VCS for obvious reasons, so check the team's sharepoint for the latest version to use in your local workspace.
 
